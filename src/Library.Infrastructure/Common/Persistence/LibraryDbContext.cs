@@ -9,7 +9,8 @@ namespace Library.Infrastructure.Common.Persistence
         public DbSet<Book> Books { get; set; } = null!;
         public DbSet<User> Users { get; set; } = null!;
         public DbSet<BookReservation> BookReservations { get; set; } = null!;
-
+        public DbSet<BookBorrow> BookBorrows { get; set; } = null!;
+        public DbSet<NotificationQueue> NotificationQueues { get; set; } = null!;
         public LibraryDbContext(DbContextOptions options) : base(options) 
         {
             

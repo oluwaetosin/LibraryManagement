@@ -3,6 +3,7 @@ using System;
 using Library.Infrastructure.Common.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Library.Infrastructure.Migrations
 {
     [DbContext(typeof(LibraryDbContext))]
-    partial class LibraryDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241006184925_AddBookReservations3")]
+    partial class AddBookReservations3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.8");
@@ -70,6 +73,15 @@ namespace Library.Infrastructure.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("Reserved")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ReservedAt")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ReservedBy")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -78,33 +90,6 @@ namespace Library.Infrastructure.Migrations
                     b.HasKey("BookID");
 
                     b.ToTable("Books");
-                });
-
-            modelBuilder.Entity("Library.Domain.Books.BookBorrow", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("BookID")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("DateBorrowed")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("Returned")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("UserID")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("BookID");
-
-                    b.HasIndex("UserID");
-
-                    b.ToTable("BookBorrows");
                 });
 
             modelBuilder.Entity("Library.Domain.Books.BookReservation", b =>
@@ -131,33 +116,6 @@ namespace Library.Infrastructure.Migrations
                     b.ToTable("BookReservations");
                 });
 
-            modelBuilder.Entity("Library.Domain.Books.NotificationQueue", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("BookID")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Message")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("Triggered")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("UserID")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BookID");
-
-                    b.HasIndex("UserID");
-
-                    b.ToTable("NotificationQueues");
-                });
-
             modelBuilder.Entity("Library.Domain.Users.User", b =>
                 {
                     b.Property<int>("UserId")
@@ -173,45 +131,7 @@ namespace Library.Infrastructure.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("Library.Domain.Books.BookBorrow", b =>
-                {
-                    b.HasOne("Library.Domain.Books.Book", "Book")
-                        .WithMany()
-                        .HasForeignKey("BookID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Library.Domain.Users.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Book");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Library.Domain.Books.BookReservation", b =>
-                {
-                    b.HasOne("Library.Domain.Books.Book", "Book")
-                        .WithMany()
-                        .HasForeignKey("BookID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Library.Domain.Users.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Book");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Library.Domain.Books.NotificationQueue", b =>
                 {
                     b.HasOne("Library.Domain.Books.Book", "Book")
                         .WithMany()

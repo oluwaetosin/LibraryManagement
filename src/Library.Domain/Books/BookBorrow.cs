@@ -6,11 +6,11 @@ using System.Reflection.Emit;
 namespace Library.Domain.Books
 {
   
-        public class BookReservation
-        {
+        public class BookBorrow
+    {
             [Key]
             [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-            public int ReservationID { get; set; }
+            public int ID { get; set; }
 
             [ForeignKey("Book")]
             public int BookID { get; set; }
@@ -20,11 +20,11 @@ namespace Library.Domain.Books
             public int UserID { get; set; }
             public virtual User User { get; set; }
 
-            public DateTime ReservationDateTime { get; set; } = DateTime.Now;
+            public DateTime DateBorrowed { get; set; } = DateTime.Now;
 
-            [NotMapped]
-            public DateTime ExpirationDateTime => ReservationDateTime.AddHours(48);
- 
+            public bool Returned { get; set; }  = false;
+
+            
 
            
         }

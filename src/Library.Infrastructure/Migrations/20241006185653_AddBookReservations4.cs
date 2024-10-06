@@ -6,32 +6,11 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Library.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class AddBookReservations : Migration
+    public partial class AddBookReservations4 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<bool>(
-                name: "Reserved",
-                table: "Books",
-                type: "INTEGER",
-                nullable: false,
-                defaultValue: false);
-
-            migrationBuilder.AddColumn<int>(
-                name: "ReservedAt",
-                table: "Books",
-                type: "INTEGER",
-                nullable: false,
-                defaultValue: 0);
-
-            migrationBuilder.AddColumn<int>(
-                name: "ReservedBy",
-                table: "Books",
-                type: "INTEGER",
-                nullable: false,
-                defaultValue: 0);
-
             migrationBuilder.CreateTable(
                 name: "BookReservations",
                 columns: table => new
@@ -40,8 +19,7 @@ namespace Library.Infrastructure.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     BookID = table.Column<int>(type: "INTEGER", nullable: false),
                     UserID = table.Column<int>(type: "INTEGER", nullable: false),
-                    ReservationDateTime = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    Status = table.Column<int>(type: "ENUM('Reserved', 'Expired', 'Cancelled')", nullable: false)
+                    ReservationDateTime = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -76,18 +54,6 @@ namespace Library.Infrastructure.Migrations
         {
             migrationBuilder.DropTable(
                 name: "BookReservations");
-
-            migrationBuilder.DropColumn(
-                name: "Reserved",
-                table: "Books");
-
-            migrationBuilder.DropColumn(
-                name: "ReservedAt",
-                table: "Books");
-
-            migrationBuilder.DropColumn(
-                name: "ReservedBy",
-                table: "Books");
         }
     }
 }

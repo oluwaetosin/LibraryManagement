@@ -3,8 +3,10 @@ using System.Text;
 using Library.Api.Filters;
 using Library.Application;
 using Library.Infrastructure;
+using Library.Infrastructure.Common.Persistence;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -53,6 +55,7 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure();
 builder.Services.AddHttpClient();
+builder.Services.AddHttpContextAccessor();
 
 var jwtSecretKey = builder.Configuration["JWT"];
 var key = Encoding.UTF8.GetBytes(jwtSecretKey);
@@ -92,6 +95,25 @@ var app = builder.Build();
 app.UseMiddleware<JwtHandler>();
 app.UseAuthentication();
 app.UseAuthorization();
+
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider
+        .GetRequiredService<LibraryDbContext>();
+
+    // Here is the migration executed
+    try
+    {
+        dbContext.Database.Migrate();
+    }
+    catch (Exception ex)
+    {
+
+        Console.WriteLine(ex.Message);
+    }
+
+}
+
 
 app.MapControllers();
 

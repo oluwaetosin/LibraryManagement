@@ -1,12 +1,40 @@
-﻿using MediatR;
+﻿using ErrorOr;
+using Library.Application.Common.Interfaces;
+using Library.Domain.Books;
+using MediatR;
 
 namespace Library.Application.Book.Command.ReserveBook
 {
-    public class BorrowBookCommandHandler : IRequestHandler<BorrowBookCommand, int>
+    public class BorrowBookCommandHandler : IRequestHandler<BorrowBookCommand, ErrorOr<bool>>
     {
-        public Task<int> Handle(BorrowBookCommand request, CancellationToken cancellationToken)
+        private readonly IBookRepository _bookRepository;
+
+        public BorrowBookCommandHandler(IBookRepository bookRepository)
         {
-            return Task.FromResult(new Random().Next(1, 300));
+            _bookRepository = bookRepository;
+        }
+
+        public async Task<ErrorOr<bool>> Handle(BorrowBookCommand request, CancellationToken cancellationToken)
+        {
+            var bookIsAvailable = await _bookRepository.BookIsAvailable(request.bookId);
+
+            if (bookIsAvailable == true)
+            {
+                var bookBorrw = new BookBorrow
+                {
+                    BookID = request.bookId,
+                    UserID = request.userId
+                };
+
+
+                await _bookRepository.BorrowBook(bookBorrw);
+
+                return true; 
+
+
+            }
+
+            return Error.Failure("General.Failure", "Book is not available");
         }
     }
 }

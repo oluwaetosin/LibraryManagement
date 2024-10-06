@@ -1,15 +1,14 @@
-﻿using ErrorOr;
-using Library.Api.Filters;
+﻿using Library.Api.Filters;
 using Library.Application.Book.Command.CreateBook;
 using Library.Application.Book.Command.ReserveBook;
 using Library.Application.Book.Command.UpdateBook;
 using Library.Application.Book.Query.GetAllBooks;
 using Library.Application.Book.Query.GetBookById;
 using Library.Application.Book.Query.SearchBook;
+using Library.Application.User.Query;
 using Library.Contracts.Books;
 using Library.Domain.Books;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Library.Api.Controllers
@@ -20,9 +19,12 @@ namespace Library.Api.Controllers
     public class BookController : ControllerBase
     {
         private readonly ISender _mediator;
-        public BookController(ISender mediator)
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        public BookController(ISender mediator,IHttpContextAccessor httpContextAccessor)
         {
-            _mediator = mediator;   
+            _mediator = mediator; 
+            _httpContextAccessor = httpContextAccessor;
+            
         }
         /// <summary>
         /// Create new Book
@@ -156,12 +158,21 @@ namespace Library.Api.Controllers
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        [HttpPost("{id}/reserve")]
+        [HttpPost("{bookid}/reserve")]
         public async Task<IActionResult> ReserveBook([FromBody] ReserveBookRequest model)
         {
-            /// TODO get userId from token
-            var result = await _mediator.Send(new ReserveBookCommand(model.BookId, 1));
-            return Ok(result);
+            object userEmail;
+            _httpContextAccessor.HttpContext.Items.TryGetValue("User", out userEmail);
+            var user = await _mediator.Send(new GetUserByEmailCommand(userEmail.ToString()));
+           
+            var result = await _mediator.Send(new ReserveBookCommand(model.BookId, user.Value.UserId));
+
+            if(result.IsError)
+            {
+                return Problem(result.FirstError.Description);
+            }
+
+            return Ok(result.Value);
         }
 
         /// <summary>
@@ -172,8 +183,11 @@ namespace Library.Api.Controllers
         [HttpPost("{id}/borrow")]
         public async Task<IActionResult> BorrowBook([FromBody] BorrowBookRequest model)
         {
-            /// TODO get userId from token
-            var result = await _mediator.Send(new BorrowBookCommand(model.BookId, 1));
+            object userEmail;
+            _httpContextAccessor.HttpContext.Items.TryGetValue("User", out userEmail);
+            var user = await _mediator.Send(new GetUserByEmailCommand(userEmail.ToString()));
+
+            var result = await _mediator.Send(new BorrowBookCommand(model.BookId, user.Value.UserId));
             return Ok(result);
         }
 
@@ -198,7 +212,11 @@ namespace Library.Api.Controllers
         [HttpPost("{id}/request-notifification")]
         public async Task<IActionResult> RequestNotification([FromBody] RequestNotificationRequest model)
         {
-            var result = await _mediator.Send(new RequestNotificationCommand(model.BookId, 1));
+            object userEmail;
+            _httpContextAccessor.HttpContext.Items.TryGetValue("User", out userEmail);
+            var user = await _mediator.Send(new GetUserByEmailCommand(userEmail.ToString()));
+
+            var result = await _mediator.Send(new RequestNotificationCommand(model.BookId, user.Value.UserId));
             return Ok(result);
         }
 

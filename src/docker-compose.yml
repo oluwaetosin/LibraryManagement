@@ -6,17 +6,8 @@ services:
     build:
       context: ./
       dockerfile: ./Library.Api/Dockerfile
-    depends_on:
-      - identity_server
     volumes:
-      - ./data:/app/data
+      - ./dataa:/app/data
     ports:
       -  8084:8080
-  identity_server:
-      image: "oluwaetosin/identity_server"
-      build:
-        context: ./IdentityServerAspNetIdentity/
-        dockerfile: ./Dockerfile
-      ports: # not actually needed, because the two services are on the same network
-        - "8081:80" 
  

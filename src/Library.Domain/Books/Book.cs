@@ -39,8 +39,6 @@ namespace Library.Domain.Books
         [MaxLength(100)]
         public string Location { get; set; }
        
-        public bool Reserved { get; set; }
-        public int ReservedBy { get; set; }
-        public int ReservedAt { get; set; }
+        
     }
 }
