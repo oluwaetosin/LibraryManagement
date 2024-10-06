@@ -1,4 +1,5 @@
 ﻿using ErrorOr;
+using Library.Api.Filters;
 using Library.Application.Book.Command.CreateBook;
 using Library.Application.Book.Command.ReserveBook;
 using Library.Application.Book.Command.UpdateBook;
@@ -8,12 +9,14 @@ using Library.Application.Book.Query.SearchBook;
 using Library.Contracts.Books;
 using Library.Domain.Books;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Library.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [AuthorizeUser]
     public class BookController : ControllerBase
     {
         private readonly ISender _mediator;
@@ -198,5 +201,6 @@ namespace Library.Api.Controllers
             var result = await _mediator.Send(new RequestNotificationCommand(model.BookId, 1));
             return Ok(result);
         }
+
     }
 }

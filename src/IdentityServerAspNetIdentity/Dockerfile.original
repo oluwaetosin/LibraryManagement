@@ -1,0 +1,28 @@
+#See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
+
+FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
+
+# Ensure we listen on any IP Address 
+ENV DOTNET_URLS=http://+:8082
+ENV ASPNETCORE_URLS=http://+:5000
+# ENV ASPNETCORE_ENVIRONMENT=”development”
+WORKDIR /app
+EXPOSE 80
+
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+ENV ASPNETCORE_ENVIRONMENT Development
+WORKDIR /src
+COPY ["ClubBooking/ClubBooking.csproj", "ClubBooking/"]
+COPY ["ClubBooking.DataAccess/ClubBooking.DataAccess.csproj", "ClubBooking.DataAccess/"]
+RUN dotnet restore "ClubBooking/ClubBooking.csproj"
+COPY . .
+WORKDIR "/src/ClubBooking"
+RUN dotnet build "ClubBooking.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "ClubBooking.csproj" -c Release -o /app/publish /p:UseAppHost=false
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "ClubBooking.dll"]
