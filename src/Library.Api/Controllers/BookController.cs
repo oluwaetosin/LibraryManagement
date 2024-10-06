@@ -1,5 +1,11 @@
-﻿using Library.Contracts.Books;
-using Microsoft.AspNetCore.Http;
+﻿using Library.Application.Book.Command.CreateBook;
+using Library.Application.Book.Command.ReserveBook;
+using Library.Application.Book.Command.UpdateBook;
+using Library.Application.Book.Query.GetAllBooks;
+using Library.Application.Book.Query.GetBookById;
+using Library.Application.Book.Query.SearchBook;
+using Library.Contracts.Books;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Library.Api.Controllers
@@ -8,10 +14,39 @@ namespace Library.Api.Controllers
     [ApiController]
     public class BookController : ControllerBase
     {
-        [HttpPost]
-        public IActionResult Create([FromBody] NewBookRequest model)
+        private readonly ISender _mediator;
+        public BookController(ISender mediator)
         {
-            return Ok(model);
+            _mediator = mediator;   
+        }
+        /// <summary>
+        /// Create new Book
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [ProducesResponseType(201)]
+        [HttpPost]
+        public async Task<ActionResult> CreateBook([FromBody] NewBookRequest model)
+        {
+            var command = new CreateBookCommand(
+                model.Title,
+                model.Author,
+                model.ISBN,
+                model.Publisher,
+                model.PublicationYear,
+                model.Category,
+                model.Language,
+                model.Edition,
+                model.Pages,
+                model.CopiesAvailable,
+                model.Location
+                );
+
+            var bookId = await _mediator.Send( command );
+
+            return CreatedAtRoute("GetBookById", routeValues: new { id = bookId }, value: bookId);
+
+          
         }
 
         /// <summary>
@@ -24,9 +59,24 @@ namespace Library.Api.Controllers
         [ProducesResponseType(typeof(IDictionary<string, string>), 400)]
         [ProducesResponseType(500)]
         [HttpPut("{id}")]
-        public IActionResult Update(int id, [FromBody] UpdateBookRequest model)
+        public async Task<IActionResult> UpdateBook(int id, [FromBody] UpdateBookRequest model)
         {
-            return Ok(model);
+            var command = new UpdateBookCommand(
+                id,
+                 model.Title,
+                model.Author,
+                model.ISBN,
+                model.Publisher,
+                model.PublicationYear,
+                model.Category,
+                model.Language,
+                model.Edition,
+                model.Pages,
+                model.CopiesAvailable,
+                model.Location);
+
+            var bookId = await _mediator.Send(command);
+            return Ok(bookId);
         }
 
         /// <summary>
@@ -35,9 +85,12 @@ namespace Library.Api.Controllers
         /// <returns></returns>
         [ProducesResponseType(200)]
         [HttpGet]
-        public IActionResult GetAllBooks()
+        public async Task<IActionResult> GetAllBooks()
         {
-            return Ok();
+            var command = new GetAllBooksCommand();
+
+            var result = await _mediator.Send(command);
+            return Ok(result);
         }
 
 
@@ -47,9 +100,10 @@ namespace Library.Api.Controllers
         /// <param name="id">Id of book</param>
         /// <returns></returns>
         [HttpGet("{id}", Name = "GetBookById")]
-        public IActionResult GetBookById(int id)
+        public async Task<IActionResult> GetBookById(int id)
         {
-            return Ok(id);
+            var result = await _mediator.Send(new GetBookByIdCommand(id));
+            return Ok(result);
 
             
         }
@@ -59,9 +113,11 @@ namespace Library.Api.Controllers
         /// <param name="model"></param>
         /// <returns></returns>
         [HttpGet("search")]
-        public IActionResult SearchBook([FromQuery] SearchBookRequest model)
+        public async Task<IActionResult> SearchBook([FromQuery] SearchBookRequest model)
         {
-            return Ok(model);
+            var result = await _mediator.Send(new SearchBookCommand(model.Name));
+            return Ok(result);
+            
         }
 
         /// <summary>
@@ -70,9 +126,11 @@ namespace Library.Api.Controllers
         /// <param name="model"></param>
         /// <returns></returns>
         [HttpPost("{id}/reserve")]
-        public IActionResult ReserveBook([FromQuery] ReserveBookRequest model)
+        public async Task<IActionResult> ReserveBook([FromBody] ReserveBookRequest model)
         {
-            return Ok(model);
+            /// TODO get userId from token
+            var result = await _mediator.Send(new ReserveBookCommand(model.BookId, 1));
+            return Ok(result);
         }
 
         /// <summary>
@@ -80,10 +138,12 @@ namespace Library.Api.Controllers
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        [HttpGet("{id}/borrow")]
-        public IActionResult BorrowBook([FromQuery] BorrowBookRequest model)
+        [HttpPost("{id}/borrow")]
+        public async Task<IActionResult> BorrowBook([FromBody] BorrowBookRequest model)
         {
-            return Ok(model);
+            /// TODO get userId from token
+            var result = await _mediator.Send(new BorrowBookCommand(model.BookId, 1));
+            return Ok(result);
         }
 
         /// <summary>
@@ -91,10 +151,11 @@ namespace Library.Api.Controllers
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        [HttpGet("{id}/request-notifification")]
-        public IActionResult ReserveBook([FromQuery] RequestNotificationRequest model)
+        [HttpPost("{id}/request-notifification")]
+        public async Task<IActionResult> RequestNotification([FromBody] RequestNotificationRequest model)
         {
-            return Ok(model);
+            var result = await _mediator.Send(new RequestNotificationCommand(model.BookId, 1));
+            return Ok(result);
         }
     }
 }
