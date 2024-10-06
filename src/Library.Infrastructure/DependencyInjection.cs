@@ -12,6 +12,7 @@ namespace Library.Infrastructure
         {
             services.AddDbContext<LibraryDbContext>(options => options.UseSqlite("Data Source = Library.db"));
             services.AddScoped<IBookRepository, BookRepository>();
+            services.AddScoped<IUserRepository, UserRepository>();
 
             return services;
         }

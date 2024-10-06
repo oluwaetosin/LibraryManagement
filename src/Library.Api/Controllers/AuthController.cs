@@ -1,4 +1,7 @@
-﻿using Library.Contracts.Github;
+﻿using Library.Application.User.Command;
+using Library.Application.User.Query;
+using Library.Contracts.Github;
+using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -10,6 +13,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 using System.Web;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace Library.Api.Controllers
 {
@@ -19,11 +23,12 @@ namespace Library.Api.Controllers
     {
         private readonly HttpClient _httpClient;
         private readonly IConfiguration _configuration;
-
-        public AuthController(HttpClient httpClient, IConfiguration configuration)
+        private readonly ISender _mediator;
+        public AuthController(HttpClient httpClient, IConfiguration configuration, ISender mediator)
         {
             _httpClient = httpClient;
             _configuration = configuration;
+            _mediator = mediator;
         }
  
 
@@ -63,6 +68,15 @@ namespace Library.Api.Controllers
                 var githubEmails = await GetGitHubEmailsAsync(accessToken);
 
                 var userProfile = githubEmails.FirstOrDefault();
+
+                var command = new GetUserByEmailCommand(userProfile.Email);
+
+                var userExist = await _mediator.Send(command);
+
+                if (userExist.IsError)
+                {
+                    var user = await _mediator.Send(new CreateUserCommand(userProfile.Email));
+                }
 
 
 
