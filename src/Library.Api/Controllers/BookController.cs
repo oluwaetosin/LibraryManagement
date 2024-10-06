@@ -175,6 +175,19 @@ namespace Library.Api.Controllers
         }
 
         /// <summary>
+        /// Borrow a book for user
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost("{id}/return")]
+        public async Task<IActionResult> ReturnBook([FromBody] BorrowBookRequest model)
+        {
+            /// TODO get userId from token
+            var result = await _mediator.Send(new BorrowBookCommand(model.BookId, 1));
+            return Ok(result);
+        }
+
+        /// <summary>
         /// Subscribe to a book availability notification
         /// </summary>
         /// <param name="model"></param>
