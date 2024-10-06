@@ -1,4 +1,7 @@
 ﻿using MediatR;
+using ErrorOr;
+using DomainBooks =  Library.Domain.Books;
+
 
 namespace Library.Application.Book.Command.CreateBook
 {
@@ -14,5 +17,5 @@ namespace Library.Application.Book.Command.CreateBook
     int Pages,
     int CopiesAvailable,
     string Location
-    ): IRequest<int>;
+    ): IRequest<ErrorOr<DomainBooks.Book>>;
 }

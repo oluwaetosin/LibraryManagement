@@ -1,5 +1,6 @@
 using System.Reflection;
 using Library.Application;
+using Library.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +18,8 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 builder.Services.AddApplication();
+builder.Services.AddInfrastructure();
+
 
 var app = builder.Build();
 

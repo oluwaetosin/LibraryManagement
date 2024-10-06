@@ -5,6 +5,7 @@ using Library.Application.Book.Query.GetAllBooks;
 using Library.Application.Book.Query.GetBookById;
 using Library.Application.Book.Query.SearchBook;
 using Library.Contracts.Books;
+using Library.Domain.Books;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -24,7 +25,7 @@ namespace Library.Api.Controllers
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        [ProducesResponseType(201)]
+        [ProducesResponseType(typeof(Book), 201)]
         [HttpPost]
         public async Task<ActionResult> CreateBook([FromBody] NewBookRequest model)
         {
@@ -42,9 +43,9 @@ namespace Library.Api.Controllers
                 model.Location
                 );
 
-            var bookId = await _mediator.Send( command );
+            var book = await _mediator.Send( command );
 
-            return CreatedAtRoute("GetBookById", routeValues: new { id = bookId }, value: bookId);
+            return CreatedAtRoute("GetBookById", routeValues: new { id = book.Value.BookID }, value: book);
 
           
         }
