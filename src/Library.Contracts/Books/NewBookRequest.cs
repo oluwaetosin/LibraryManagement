@@ -12,7 +12,8 @@
     string Edition,
     int Pages,
     int CopiesAvailable,
-    string Location
+    string Location,
+    int Copies
 );
 
 }

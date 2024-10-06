@@ -34,6 +34,7 @@ namespace Library.Domain.Books
         public int Pages { get; set; }
 
         public int CopiesAvailable { get; set; }
+        public int Copies { get; set; }
 
         [MaxLength(100)]
         public string Location { get; set; }
