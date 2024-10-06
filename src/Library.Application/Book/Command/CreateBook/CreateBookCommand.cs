@@ -16,6 +16,7 @@ namespace Library.Application.Book.Command.CreateBook
     string Edition,
     int Pages,
     int CopiesAvailable,
-    string Location
+    string Location,
+    int Copies
     ): IRequest<ErrorOr<DomainBooks.Book>>;
 }

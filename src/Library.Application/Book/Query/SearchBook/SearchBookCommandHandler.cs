@@ -1,17 +1,28 @@
-﻿using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ErrorOr;
+using Library.Application.Common.Interfaces;
+using MediatR;
+using DomainBooks = Library.Domain.Books;
 
 namespace Library.Application.Book.Query.SearchBook
 {
-    public class SearchBookCommandHandler : IRequestHandler<SearchBookCommand, int>
+    public class SearchBookCommandHandler : IRequestHandler<SearchBookCommand, ErrorOr<IList<DomainBooks.Book>>>
     {
-        public Task<int> Handle(SearchBookCommand request, CancellationToken cancellationToken)
+        private readonly IBookRepository _bookRepository;
+
+        public SearchBookCommandHandler(IBookRepository bookRepository)
         {
-            return Task.FromResult(new Random().Next(1, 300));
+            _bookRepository = bookRepository;
+        }
+
+        public  async Task<ErrorOr<IList<DomainBooks.Book>>> Handle(SearchBookCommand request, CancellationToken cancellationToken)
+        {
+            IList<DomainBooks.Book> result =   await _bookRepository.SearchBook(request.Name);
+
+            if (result == null || result.Count == 0) {
+                return Error.NotFound();
+            }
+
+            return result.ToList();
         }
     }
 }

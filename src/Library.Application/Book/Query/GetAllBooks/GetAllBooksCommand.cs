@@ -1,12 +1,10 @@
-﻿using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ErrorOr;
+using MediatR;
+using DomainBooks = Library.Domain.Books;
+
 
 namespace Library.Application.Book.Query.GetAllBooks
 {
-   public record GetAllBooksCommand(): IRequest<List<int>>;
+    public record GetAllBooksCommand(): IRequest<ErrorOr<IList<DomainBooks.Book>>>;
     
 }

@@ -1,4 +1,6 @@
-﻿using MediatR;
+﻿using ErrorOr;
+using MediatR;
+using DomainBooks = Library.Domain.Books;
 
 namespace Library.Application.Book.Command.UpdateBook
 {
@@ -15,6 +17,7 @@ namespace Library.Application.Book.Command.UpdateBook
        string Edition,
        int Pages,
        int CopiesAvailable,
-       string Location
-    ) : IRequest<int>;
+       string Location,
+       int Copies
+    ) : IRequest<ErrorOr<DomainBooks.Book>>;
 }

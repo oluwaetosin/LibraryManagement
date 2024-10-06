@@ -28,11 +28,12 @@ namespace Library.Application.Book.Command.CreateBook
                 Location = request.Location,
                 Pages = request.Pages,
                 PublicationYear = request.PublicationYear,
-                Publisher = request.Publisher
+                Publisher = request.Publisher,
+                Copies = request.Copies
 
             };
 
-            _bookRepository.CreateBook(book);
+            await _bookRepository.CreateBook(book);
 
             return book;
         }

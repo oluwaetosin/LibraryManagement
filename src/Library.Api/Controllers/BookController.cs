@@ -1,4 +1,5 @@
-﻿using Library.Application.Book.Command.CreateBook;
+﻿using ErrorOr;
+using Library.Application.Book.Command.CreateBook;
 using Library.Application.Book.Command.ReserveBook;
 using Library.Application.Book.Command.UpdateBook;
 using Library.Application.Book.Query.GetAllBooks;
@@ -40,12 +41,15 @@ namespace Library.Api.Controllers
                 model.Edition,
                 model.Pages,
                 model.CopiesAvailable,
-                model.Location
+                model.Location,
+                model.Copies
                 );
 
             var book = await _mediator.Send( command );
 
-            return CreatedAtRoute("GetBookById", routeValues: new { id = book.Value.BookID }, value: book);
+            
+
+            return CreatedAtRoute("GetBookById", routeValues: new { id = book.Value.BookID }, value: book.Value);
 
           
         }
@@ -57,10 +61,9 @@ namespace Library.Api.Controllers
         /// <param name="model"></param>
         /// <returns></returns>
         [ProducesResponseType(200)]
-        [ProducesResponseType(typeof(IDictionary<string, string>), 400)]
         [ProducesResponseType(500)]
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateBook(int id, [FromBody] UpdateBookRequest model)
+        public async Task<ActionResult<Book>> UpdateBook(int id, [FromBody] UpdateBookRequest model)
         {
             var command = new UpdateBookCommand(
                 id,
@@ -74,24 +77,38 @@ namespace Library.Api.Controllers
                 model.Edition,
                 model.Pages,
                 model.CopiesAvailable,
-                model.Location);
+                model.Location,
+                model.Copies);
 
-            var bookId = await _mediator.Send(command);
-            return Ok(bookId);
+            var book = await _mediator.Send(command);
+
+            if (book.IsError)
+            {
+                return Problem("Unexpected Error Occured");
+            }
+
+            return Ok(book);
         }
 
         /// <summary>
         /// List all books
         /// </summary>
         /// <returns></returns>
-        [ProducesResponseType(200)]
+        [ProducesResponseType( typeof(Book), 200)]
+        [ProducesResponseType(404)]
         [HttpGet]
-        public async Task<IActionResult> GetAllBooks()
+        public async Task<ActionResult<Book>> GetAllBooks()
         {
             var command = new GetAllBooksCommand();
 
             var result = await _mediator.Send(command);
-            return Ok(result);
+
+            if (result.IsError)
+            {
+                return NotFound();
+            }
+
+            return Ok(result.Value);
         }
 
 
@@ -101,12 +118,17 @@ namespace Library.Api.Controllers
         /// <param name="id">Id of book</param>
         /// <returns></returns>
         [HttpGet("{id}", Name = "GetBookById")]
-        public async Task<IActionResult> GetBookById(int id)
+        public async Task<ActionResult<Book>> GetBookById(int id)
         {
             var result = await _mediator.Send(new GetBookByIdCommand(id));
-            return Ok(result);
 
-            
+            if (result.IsError)
+            {
+                return NotFound();
+            }
+
+            return Ok(result.Value);
+
         }
         /// <summary>
         /// Search book by name
@@ -114,10 +136,15 @@ namespace Library.Api.Controllers
         /// <param name="model"></param>
         /// <returns></returns>
         [HttpGet("search")]
-        public async Task<IActionResult> SearchBook([FromQuery] SearchBookRequest model)
+        public async Task<ActionResult<IList<Book>>> SearchBook([FromQuery] SearchBookRequest model)
         {
             var result = await _mediator.Send(new SearchBookCommand(model.Name));
-            return Ok(result);
+
+            if (result.IsError)
+            {
+                return NotFound();
+            }
+            return Ok(result.Value);
             
         }
 
